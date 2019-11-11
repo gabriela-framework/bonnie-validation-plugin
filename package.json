@@ -4,7 +4,7 @@
   "description": "Validation plugin for Gabriela framework",
   "main": "index.js",
   "scripts": {
-    "test": "npm run test"
+    "test": "mocha --bail -R mocha-pretty-spec-reporter 'tests/*.spec.js'"
   },
   "repository": {
     "type": "git",
@@ -21,6 +21,14 @@
   },
   "homepage": "https://github.com/gabriela-framework/bonnie-validation-plugin#readme",
   "dependencies": {
-    "@hapi/joi": "^16.1.7"
+    "@hapi/joi": "^16.1.7",
+    "deepcopy": "^2.0.0"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "faker": "^4.1.0",
+    "mocha": "^6.2.0",
+    "mocha-pretty-spec-reporter": "0.1.0-beta.2",
+    "request-promise": "^4.2.5"
   }
 }

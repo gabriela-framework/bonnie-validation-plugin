@@ -1,6 +1,6 @@
 module.exports = {
     name: 'validator',
     modules: [
-        require('./initModule'),
+        require('./validator/initModule'),
     ],
 };
