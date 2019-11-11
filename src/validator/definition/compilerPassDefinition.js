@@ -14,6 +14,21 @@ function _determineConstraintValueType(constraintValue) {
     return 'scalar';
 }
 
+function _createArgs(schemaBuilder, constraintName, value) {
+    if (Array.isArray(value)) {
+        return value;
+    }
+
+    let args = [];
+    const argStrings = getArgNames(schemaBuilder[constraintName]);
+
+    if (argStrings.length > 0) {
+        args = [value];
+    }
+
+    return args;
+}
+
 function _createSchemaBuilder(type, constraints, propName) {
     let schemaBuilder = Joi[type]();
 
@@ -21,13 +36,7 @@ function _createSchemaBuilder(type, constraints, propName) {
         const constraintType = _determineConstraintValueType(constraintValue);
 
         if (constraintType === 'object') {
-            let val;
-
-            if (Array.isArray(constraintValue.value)) {
-                val = constraintValue.value;
-            } else {
-                val = [constraintValue.value];
-            }
+            const args = _createArgs(schemaBuilder, constraintName, constraintValue.value);
 
             const message = constraintValue.message;
 
@@ -36,19 +45,14 @@ function _createSchemaBuilder(type, constraints, propName) {
                 err.propName = propName;
                 err.type = constraintName;
 
-                schemaBuilder = schemaBuilder[constraintName](...val).error(err);
+                schemaBuilder = schemaBuilder[constraintName](...args).error(err);
             } else {
-                schemaBuilder = schemaBuilder[constraintName](...val);
+                schemaBuilder = schemaBuilder[constraintName](...args);
             }
         } else if (constraintType === 'array') {
             schemaBuilder = schemaBuilder[constraintName](...constraintValue);
         } else {
-            let args = [];
-            const argStrings = getArgNames(constraints[constraintName]);
-
-            if (argStrings.length > 0) {
-                args = [constraintValue];
-            }
+            let args = _createArgs(schemaBuilder, constraintName, constraintValue);
 
             schemaBuilder = schemaBuilder[constraintName](...args);
         }
@@ -88,15 +92,23 @@ function _createDefinition(validator) {
                 if (state[validator.modelName]) {
                     const {error, value} = validator.schemaValidator.validate(state[validator.modelName], {
                         abortEarly: false,
+                        allowUnknown: validator.generalConfig.allowUnknown,
                     });
+
+                    if (!error) {
+                        state[errorPropName] = null;
+
+                        return;
+                    }
 
                     const errors = {};
 
-                    if (error instanceof Error) {
+                    // error.propName means that this plugin created it, not joi
+                    if (error.propName) {
                         errors[error.propName] = error.message;
                     } else {
                         for (const detail of error.details) {
-                            const key = detail.context.label;
+                            const key = detail.context.key;
                             const value = detail.message;
 
                             errors[key] = value;
@@ -119,6 +131,10 @@ module.exports = {
             if (!hasKey(validatorConfig, 'models')) {
                 throw new Error(`Invalid validator config. 'models' key is empty`);
             }
+
+            const generalConfig = {
+                allowUnknown: (validatorConfig.allowUnknown !== true) ? false : true,
+            };
 
             if (!is('object', validatorConfig['models'])) {
                 throw new Error(`Invalid validator config. 'models' key has to be an object`);
@@ -143,10 +159,13 @@ module.exports = {
                     throw new Error(message);
                 }
 
+                const joiSchema = Joi.object(builtSchema);
+
                 const validator = {
-                    schemaValidator: Joi.object(builtSchema),
+                    schemaValidator: joiSchema,
                     modelName: modelName,
                     propertyMetadata: deepcopy(propertyMetadata),
+                    generalConfig: generalConfig,
                 };
 
                 compiler.add(_createDefinition(validator));
