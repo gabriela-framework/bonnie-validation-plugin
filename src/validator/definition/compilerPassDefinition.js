@@ -88,6 +88,7 @@ function _createDefinition(validator) {
                 if (state[validator.modelName]) {
                     const {error, value} = validator.schemaValidator.validate(state[validator.modelName], {
                         abortEarly: false,
+                        allowUnknown: validator.generalConfig.allowUnknown,
                     });
 
                     const errors = {};
@@ -120,6 +121,10 @@ module.exports = {
                 throw new Error(`Invalid validator config. 'models' key is empty`);
             }
 
+            const generalConfig = {
+                allowUnknown: (validatorConfig.allowUnknown !== true) ? false : true,
+            };
+
             if (!is('object', validatorConfig['models'])) {
                 throw new Error(`Invalid validator config. 'models' key has to be an object`);
             }
@@ -143,10 +148,13 @@ module.exports = {
                     throw new Error(message);
                 }
 
+                const joiSchema = Joi.object(builtSchema);
+
                 const validator = {
-                    schemaValidator: Joi.object(builtSchema),
+                    schemaValidator: joiSchema,
                     modelName: modelName,
                     propertyMetadata: deepcopy(propertyMetadata),
+                    generalConfig: generalConfig,
                 };
 
                 compiler.add(_createDefinition(validator));
