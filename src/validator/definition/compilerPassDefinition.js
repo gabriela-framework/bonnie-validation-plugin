@@ -103,11 +103,12 @@ function _createDefinition(validator) {
 
                     const errors = {};
 
-                    if (error instanceof Error) {
+                    // error.propName means that this plugin created it, not joi
+                    if (error.propName) {
                         errors[error.propName] = error.message;
                     } else {
                         for (const detail of error.details) {
-                            const key = detail.context.label;
+                            const key = detail.context.key;
                             const value = detail.message;
 
                             errors[key] = value;
