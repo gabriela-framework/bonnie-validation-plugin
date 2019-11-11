@@ -1,0 +1,26 @@
+{
+  "name": "bonnie-validation-plugin",
+  "version": "0.0.1",
+  "description": "Validation plugin for Gabriela framework",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gabriela-framework/bonnie-validation-plugin.git"
+  },
+  "keywords": [
+    "gabriela",
+    "validation"
+  ],
+  "author": "Mario Skrlec",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gabriela-framework/bonnie-validation-plugin/issues"
+  },
+  "homepage": "https://github.com/gabriela-framework/bonnie-validation-plugin#readme",
+  "dependencies": {
+    "@hapi/joi": "^16.1.7"
+  }
+}
