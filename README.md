@@ -8,4 +8,4 @@ abstract and makes a lot easier to use within Gabriela.*
 Why the name Bonnie? Its the name of my first dog. Craziest dog you can find
 but I loved her.
 
-Refer to [documentation]() for additional information.
+Refer to [documentation](https://gabriela-framework.github.io/bonnie-validation-plugin/#/) for additional information.
