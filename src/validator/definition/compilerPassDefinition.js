@@ -90,10 +90,15 @@ function _createDefinition(validator) {
                 }
 
                 if (state[validator.modelName]) {
-                    const {error, value} = validator.schemaValidator.validate(state[validator.modelName], {
-                        abortEarly: false,
-                        allowUnknown: validator.generalConfig.allowUnknown,
-                    });
+                    const allowUnknown = (propertyMetadata.allowUnknown === true) ? true : false;
+                    const abortEarly = (propertyMetadata.abortEarly === true) ? true : false;
+
+                    const options = {
+                        abortEarly: abortEarly,
+                        allowUnknown: allowUnknown,
+                    };
+
+                    const {error, value} = validator.schemaValidator.validate(state[validator.modelName], options);
 
                     if (!error) {
                         state[errorPropName] = null;

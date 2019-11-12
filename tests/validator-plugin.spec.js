@@ -246,4 +246,69 @@ describe('Validate all the validator plugin features', () => {
 
         app.startApp();
     });
+
+    it('should fail to validate a model with unknown fields', (done) => {
+        let entersMiddleware = false;
+
+        const app = gabriela.asProcess({
+            config: {
+                framework: {},
+                validator: {
+                    models: {
+                        myModel: {
+                            allowUnknown: false,
+                            properties: {
+                                username: {
+                                    type: 'string',
+                                    constraints: {
+                                        alphanum: true,
+                                        required: true,
+                                        min: 3,
+                                        max: 10
+                                    }
+                                },
+                                birthYear: {
+                                    type: 'number',
+                                    constraints: {
+                                        integer: true,
+                                        min: 1900,
+                                        max: 2013,
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }, {
+            events: {
+                onAppStarted() {
+                    expect(entersMiddleware).to.be.equal(true);
+
+                    done();
+                }
+            }
+        });
+
+        app.addPlugin(validatorPlugin);
+
+        app.addModule({
+            name: 'validatorCheck',
+            init: [function(state) {
+                state.myModel = {
+                    username: 'username',
+                    birthYear: 1989,
+                    lastName: 'sdfjaskdlf',
+                };
+            }],
+            validators: ['validateMyModel(state)'],
+            moduleLogic: [function(state) {
+                entersMiddleware = true;
+
+                expect(state.myModelErrors.lastName).to.be.equal('"lastName" is not allowed');
+            }]
+        });
+
+        app.startApp();
+    });
 });
