@@ -36,6 +36,10 @@ function _createSchemaBuilder(constraintMetadata, propName) {
     let schemaBuilder = Joi[type]();
 
     if (hasKey(constraintMetadata, 'allow')) {
+        if (!is('string', constraintMetadata['allow']) && !Array.isArray(constraintMetadata['allow'])) {
+            throw new Error(`Invalid validator configuration for property '${propName}'. 'allow' key can be a string or an array`);
+        }
+        
         if (is('string', constraintMetadata['allow'])) {
             schemaBuilder = schemaBuilder.allow(constraintMetadata['allow']);
         } else if (Array.isArray(constraintMetadata['allow'])) {
