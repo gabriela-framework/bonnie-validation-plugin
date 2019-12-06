@@ -30,6 +30,16 @@ function _createArgs(schemaBuilder, constraintName, value) {
 }
 
 function _createSchemaBuilder(constraintMetadata, propName) {
+    const currentKeys = Object.keys(constraintMetadata);
+
+    if (!currentKeys.includes('type')) {
+        throw new Error(`Invalid validator configuration for property '${propName}'. 'type' key must be present`);
+    }
+
+    if (!currentKeys.includes('constraints')) {
+        throw new Error(`Invalid validator configuration for property '${propName}'. 'constraints' key must be present even if its just an empty object`);
+    }
+
     const type = constraintMetadata['type'];
     const constraints = constraintMetadata['constraints'];
 
@@ -39,7 +49,7 @@ function _createSchemaBuilder(constraintMetadata, propName) {
         if (!is('string', constraintMetadata['allow']) && !Array.isArray(constraintMetadata['allow'])) {
             throw new Error(`Invalid validator configuration for property '${propName}'. 'allow' key can be a string or an array`);
         }
-        
+
         if (is('string', constraintMetadata['allow'])) {
             schemaBuilder = schemaBuilder.allow(constraintMetadata['allow']);
         } else if (Array.isArray(constraintMetadata['allow'])) {
