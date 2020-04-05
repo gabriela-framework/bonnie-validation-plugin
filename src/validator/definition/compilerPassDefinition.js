@@ -29,8 +29,39 @@ function _createArgs(schemaBuilder, constraintName, value) {
     return args;
 }
 
-function _createSchemaBuilder(type, constraints, propName) {
+function _createSchemaBuilder(constraintMetadata, propName) {
+    const currentKeys = Object.keys(constraintMetadata);
+
+    if (!currentKeys.includes('type')) {
+        throw new Error(`Invalid validator configuration for property '${propName}'. 'type' key must be present`);
+    }
+
+    if (!currentKeys.includes('constraints')) {
+        throw new Error(`Invalid validator configuration for property '${propName}'. 'constraints' key must be present even if its just an empty object`);
+    }
+
+    const type = constraintMetadata['type'];
+    const constraints = constraintMetadata['constraints'];
+
     let schemaBuilder = Joi[type]();
+
+    if (hasKey(constraintMetadata, 'allow')) {
+        if (!is('string', constraintMetadata['allow']) && !Array.isArray(constraintMetadata['allow'])) {
+            throw new Error(`Invalid validator configuration for property '${propName}'. 'allow' key can be a string or an array`);
+        }
+
+        if (is('string', constraintMetadata['allow'])) {
+            schemaBuilder = schemaBuilder.allow(constraintMetadata['allow']);
+        } else if (Array.isArray(constraintMetadata['allow'])) {
+            const allowed = constraintMetadata['allow'];
+
+            for (const allow of allowed) {
+                schemaBuilder = schemaBuilder.allow(allow);
+            }
+        }
+    }
+
+    if (!constraints) return schemaBuilder;
 
     for (const [constraintName, constraintValue] of Object.entries(constraints)) {
         const constraintType = _determineConstraintValueType(constraintValue);
@@ -153,11 +184,11 @@ module.exports = {
                 try {
                     for (const [propName, constraintMetadata] of Object.entries(propertyMetadata['properties'])) {
                         builtSchema[propName] = _createSchemaBuilder(
-                            constraintMetadata['type'],
-                            constraintMetadata['constraints'],
+                            constraintMetadata,
                             propName
                         );
                     }
+
                 } catch (err) {
                     const message = `Validator plugin error. An error has been thrown by Joi from Hapi.js with message: '${err.message}'`;
 
