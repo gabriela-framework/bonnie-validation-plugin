@@ -131,7 +131,7 @@ module.exports = {
     name: 'validatorCompilerPass',
     compilerPass: {
         init: function(config, compiler) {
-            const validatorConfig = config['config']['validator'];
+            const validatorConfig = config['plugins']['validator'];
 
             if (!hasKey(validatorConfig, 'models')) {
                 throw new Error(`Invalid validator config. 'models' key is empty`);

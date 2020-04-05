@@ -22,7 +22,8 @@
   "homepage": "https://github.com/gabriela-framework/bonnie-validation-plugin#readme",
   "dependencies": {
     "@hapi/joi": "^16.1.7",
-    "deepcopy": "^2.0.0"
+    "deepcopy": "^2.0.0",
+    "gabriela": "^1.0.2"
   },
   "devDependencies": {
     "chai": "^4.2.0",

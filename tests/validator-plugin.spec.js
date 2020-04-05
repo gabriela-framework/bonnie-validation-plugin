@@ -6,19 +6,13 @@ const it = mocha.it;
 const describe = mocha.describe;
 const expect = chai.expect;
 
-const gabriela = require('../gabriela/src/index');
+const gabriela = require('gabriela');
 
 const validatorPlugin = require('../src/index');
 
 describe('Validate all the validator plugin features', () => {
     it('should throw an error if the models key is not there', (done) => {
         const app = gabriela.asProcess({
-            config: {
-                framework: {},
-                validator: {
-                }
-            }
-        }, {
             events: {
                 catchError(err) {
                     expect(entersMiddleware).to.be.equal(false);
@@ -48,13 +42,11 @@ describe('Validate all the validator plugin features', () => {
 
     it('should throw an error if models key is not an object type', (done) => {
         const app = gabriela.asProcess({
-            config: {
-                framework: {},
+            plugins: {
                 validator: {
-                    models: []
+                    models: null,
                 }
-            }
-        }, {
+            },
             events: {
                 catchError(err) {
                     expect(entersMiddleware).to.be.equal(false);
@@ -86,8 +78,7 @@ describe('Validate all the validator plugin features', () => {
         let entersMiddleware = false;
 
         const app = gabriela.asProcess({
-            config: {
-                framework: {},
+            plugins: {
                 validator: {
                     models: {
                         myModel: {
@@ -104,8 +95,7 @@ describe('Validate all the validator plugin features', () => {
                         }
                     }
                 }
-            }
-        }, {
+            },
             events: {
                 onAppStarted() {
                     expect(entersMiddleware).to.be.equal(true);
@@ -139,8 +129,7 @@ describe('Validate all the validator plugin features', () => {
         let entersMiddleware = false;
 
         const app = gabriela.asProcess({
-            config: {
-                framework: {},
+            plugins: {
                 validator: {
                     models: {
                         myModel: {
@@ -158,8 +147,7 @@ describe('Validate all the validator plugin features', () => {
                         }
                     }
                 }
-            }
-        }, {
+            },
             events: {
                 onAppStarted() {
                     expect(entersMiddleware).to.be.equal(true);
@@ -193,8 +181,7 @@ describe('Validate all the validator plugin features', () => {
         let entersMiddleware = false;
 
         const app = gabriela.asProcess({
-            config: {
-                framework: {},
+            plugins: {
                 validator: {
                     models: {
                         myModel: {
@@ -214,8 +201,7 @@ describe('Validate all the validator plugin features', () => {
                         }
                     }
                 }
-            }
-        }, {
+            },
             events: {
                 onAppStarted() {
                     expect(entersMiddleware).to.be.equal(true);
@@ -251,8 +237,7 @@ describe('Validate all the validator plugin features', () => {
         let entersMiddleware = false;
 
         const app = gabriela.asProcess({
-            config: {
-                framework: {},
+            plugins: {
                 validator: {
                     models: {
                         myModel: {
@@ -279,8 +264,7 @@ describe('Validate all the validator plugin features', () => {
                         }
                     }
                 }
-            }
-        }, {
+            },
             events: {
                 onAppStarted() {
                     expect(entersMiddleware).to.be.equal(true);
