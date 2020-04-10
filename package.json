@@ -1,6 +1,6 @@
 {
   "name": "bonnie-validation-plugin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Validation plugin for Gabriela framework",
   "main": "index.js",
   "scripts": {

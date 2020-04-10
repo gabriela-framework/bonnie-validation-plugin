@@ -8,28 +8,26 @@ abstract and makes a lot easier to use within Gabriela.
 
 # 1. Installation
 
-This project cannot yet be installed from npm but only cloned. When Gabriela goes in Beta,
-all the created plugins will be on npm. But you can clone it and
-perhaps, use it as a git submodule.
-
-`git clone git@github.com:gabriela-framework/bonnie-validation-plugin.git`
-
-Since Gabriela is still under development, it is used as a submodule in this plugin.
-Because of that, you have to clone gabriela as a submodule and then install Gabriela dependencies.
-
-``cd /path/to/your/project/gabriela``
-
-``git submodule init``
-
-``git submodule update``
-
-``npm install``
-
-Sorry for the inconvenience. 
+`npm install bonnie-validation-plugin@1.0.1`
 
 # 2. Declaring validation in config
 
-For now, we will only see how to declare models in config. 
+Lets first create a module to work with.
+
+````javascript
+    const gabriela = require('gabriela');
+
+    const validationExampleModule = {
+        name: 'validationExampleModule',
+        init: [function(state) {
+            // We create myModel and initialize it to an empty object. This will 
+            // make the validation to fail
+            state.validationExampleModel = {}
+        }],
+    }
+
+    gabriela.addModule(validationExampleModule);
+````
 
 This plugin validates models, not values. You declare validation configuration
 in `config` but you have to create the actual model yourself, before the validation starts.
@@ -37,29 +35,30 @@ It is best to see it in example.
 
 `````javascript
 const gabriela = require('gabriela');
-const validator = require('bonnie-validation-plugin');
+const validatorPlugin = require('bonnie-validation-plugin');
 
 const app = gabriela.asProcess({
-    config: {
-        framework: {},
-        // Validation config goes under the 'validator' key
-        validator: {
-            models: {
-                myModel: {
-                    // If the model key does not exist on the state, an error is thrown.
-                    // You can add an optional custom message if the model does not exist on the state.
-                    nonExistentModelMessage: 'Model \'myModel\' does not exist',
-                    properties: {
-                        name: {
-                            type: 'string',
-                            constraints: {
-                                required: true,
-                                min: {
-                                    value: 3,
-                                    message: 'Name has to have more than 3 characters'
-                                },
-                                max: 10       
-                            }       
+    plugins: {
+        validators: {
+            // Validation config goes under the 'validator' key
+            validator: {
+                models: {
+                    validationExampleModel: {
+                        // If the model key does not exist on the state, an error is thrown.
+                        // You can add an optional custom message if the model does not exist on the state.
+                        nonExistentModelMessage: 'Model \'validationExampleModel\' does not exist',
+                        properties: {
+                             name: {
+                                 type: 'string',
+                                 constraints: {
+                                     required: true,
+                                     min: {
+                                         value: 3,
+                                         message: 'Name has to have more than 3 characters'
+                                     },
+                                     max: 10       
+                                 }       
+                             }
                         }
                     }
                 }
@@ -68,7 +67,17 @@ const app = gabriela.asProcess({
     }
 });
 
-app.addPlugin(validator);
+const validationExampleModule = {
+    name: 'validationExampleModule',
+    init: [function(state) {
+            // We create myModel and initialize it to an empty object. This will 
+            // make the validation to fail
+            state.validationExampleModel = {}
+    }],
+}
+
+app.addPlugin(validatorPlugin);
+app.addModule(validationExampleModule);
 
 app.startApp();
 
@@ -93,7 +102,7 @@ ___
 
 Our main constraint is *string* and subconstraints are *required*, *min* and *max*. Every subconstraint
 is a function on a Joi schema object. Some of those objects have multiple arguments.
-For example, the signature for *min* subconstraint is `Joi.min(value, [encoding)`. If you which
+For example, the signature for *min* subconstraint is `Joi.min(value, [encoding)`. If you wish
 to pass the encoding argument, pass the value of any constraint as an array
 
 ````javascript
@@ -124,30 +133,30 @@ After we declare our model in config, we can use it in our module so let's expan
 from above and create a module that creates a model and validates it. 
 
 ````javascript
-    const myModule = {
-        name: 'myModule',
+    const validationExampleModule = {
+        name: 'validationExampleModule',
         init: [function(state) {
-            // We create myModel and initialize it to an empty object. This will 
+            // We create validationExampleModel and initialize it to an empty object. This will 
             // make the validation to fail
-            state.myModel = {}
+            state.validationExampleModel = {}
         }],
         validators: ['validateMyModel(state)'],
         moduleLogic: [function(state) {
-            // state now has a 'myModelErrors' property. If this property
-            // is null, 'myModel' is valid. If it holds a list (an object) of errors
+            // state now has a 'validationExampleModelErrors' property. If this property
+            // is null, 'validationExampleModel' is valid. If it holds a list (an object) of errors
             // then it is invalid
-            if (state.myModelErrors) {
+            if (state.validationExampleModelErrors) {
                 // model is invalid
             }
         }]
     }
 ````
 
-Lets examine this module a little closer. First, what is *validateMyModel(state)*?
+Lets examine this module a little closer. First, what is *validateValidationExampleModel(state)*?
 
 Under the hood, validator creates a service that is used as a middleware. By convention, this service
-is called *validate[model name from config]*. Since we declared *myModel* in config, this service
-is created with the *validateMyModel* name. This service expects the *state* argument so don't forget 
+is called *validate[model name from config]*. Since we declared *validationExampleModel* in config, this service
+is created with the *validateValidationExampleModel* name. This service expects the *state* argument so don't forget 
 to include it. It also creates a property called *[model name from config]Errors* that is created by convention.
 If this property is null, the model is valid. If it holds a list of error, the model is invalid.
 
@@ -158,16 +167,29 @@ If this property is null, the model is valid. If it holds a list of error, the m
     }
 ````
 
-In order for validation to work, you have to create the model on the *state* before *validateMyModel*
-middleware is called. We do that in the *init* middleware but you can do it in any middleware as long as validation
+In order for validation to work, you have to create the model on the *state* before *validateValidationExampleModel*
+middleware is called. I do that in the *init* middleware but you can do it in any middleware as long as validation
 gets called after the model is created.
 
+# 4. Allow empty
 
+Sometimes, you may want to allow empty values to a validation property and validate it only if not empty.
+To do that in this plugin, declare an `allow` property on the validation model.
 
+`````javascript
+// ... shortened for brevity
+validationExampleModel: {
+    properties: {
+        name: {
+            allow: ''
+            // allow: [''] also possible
+            // and allow: ['', null] also possible
+            // ... the rest of the fields goes here
+        }   
+    }
+}
+`````
 
-
-
-
-
-
+This model will be allowed to be validated if `name` is '' (an empty string),
+but if name is not an empty string, the rest of the constraints will kick in.
 
